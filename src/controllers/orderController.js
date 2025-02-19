@@ -5,7 +5,7 @@ const createOrder = async (req, res) => {
     try {
         const { product, supplier, quantity } = req.body;
         const order = await Order.create({ product, supplier, quantity });
-        res.status(201).json(order);
+        res.sendResponse(201, "success", "Order created successfully", order);
     } catch (error) {
         res.status(500).json({ message: "Failed to create order", error });
     }
@@ -17,7 +17,7 @@ const getOrders = async (req, res) => {
         const orders = await Order.find()
             .populate({ path: "product", select: "name _id category" }) 
             .populate({ path: "supplier", select: "name _id" }); 
-        res.status(200).json(orders);
+            res.sendResponse(200, "success", "Orders retrieved successfully", orders);
     } catch (error) {
         res.status(500).json({ message: "Failed to fetch orders", error });
     }
