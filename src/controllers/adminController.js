@@ -18,53 +18,6 @@ const generateRefreshToken = (id) => {
   );
 };
 
-// Register Admin
-const registerAdmin = asyncHandler(async (req, res) => {
-  const { name, email, password, phoneNumber, dateOfBirth, address, role } =
-    req.body;
-
-  const adminExists = await Admin.findOne({ email });
-  if (adminExists) {
-    return res.status(400).json({ message: "Admin already exists" });
-  }
-
-  const admin = await Admin.create({
-    name,
-    email,
-    password,
-    phoneNumber,
-    dateOfBirth,
-    address,
-    role,
-  });
-
-  if (admin) {
-    const accessToken = generateToken(admin._id);
-    const refreshToken = generateRefreshToken(admin._id);
-
-    // Set refresh token in cookie
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
-
-    return res.status(201).json({
-      status: "success",
-      message: "Admin registered successfully",
-      data: {
-        _id: admin._id,
-        name: admin.name,
-        email: admin.email,
-        token: accessToken,
-        refreshToken: refreshToken,
-      },
-    });
-  } else {
-    return res.status(400).json({ message: "Invalid admin data" });
-  }
-});
 
 // Login Admin
 const loginAdmin = asyncHandler(async (req, res) => {
@@ -90,6 +43,10 @@ const loginAdmin = asyncHandler(async (req, res) => {
         _id: admin._id,
         name: admin.name,
         email: admin.email,
+        role: admin.role,
+        address: admin.address,
+        phone: admin.phoneNumber,
+        dob: admin.dateOfBirth,
         token: accessToken,
         refreshToken: refreshToken,
       },
@@ -153,7 +110,6 @@ const getAdminProfile = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
-  registerAdmin,
   loginAdmin,
   refreshTokens,
   getAdminProfile,

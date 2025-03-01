@@ -2,8 +2,8 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./config/db');
-const orderRoutes = require("./routes/orderRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const userRoutes = require("./routes/userRoutes");
 const errorHandler = require('./middlewares/errorHandler');
 const responseMiddleware = require("./middlewares/responseMiddleware");
 
@@ -19,6 +19,6 @@ app.use(errorHandler);
 
 
 app.use("/api/admin", adminRoutes);
-app.use("/api/orders", orderRoutes);
+app.use("/api/user", userRoutes);
 
 module.exports = app;
