@@ -5,6 +5,14 @@ const adminSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    phoneNumber: { type: String, required: true, unique: true},
+    dateOfBirth : { type: Date, required: true},
+    address : { type: String, required: true},
+    role: { type: String, enum: ['admin', 'lecturer', 'student'], default: 'user', required: true },
+    joinedDate: { type: Date, default: Date.now },
+    lastLogin: { type: Date },
+    isActive: { type: Boolean, default: true },
+
 });
 
 // Hash the password before saving

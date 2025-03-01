@@ -15,8 +15,7 @@ const createOrder = async (req, res) => {
 const getOrders = async (req, res) => {
     try {
         const orders = await Order.find()
-            .populate({ path: "product", select: "name _id category" }) 
-            .populate({ path: "supplier", select: "name _id" }); 
+           
             res.sendResponse(200, "success", "Orders retrieved successfully", orders);
     } catch (error) {
         res.status(500).json({ message: "Failed to fetch orders", error });
