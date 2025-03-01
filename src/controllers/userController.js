@@ -16,6 +16,7 @@ const generateRefreshToken = (id) => {
   );
 };
 
+
 const registerAdmin = asyncHandler(async (req, res) => {
     const { name, email, password, phoneNumber, dateOfBirth, address, role } =
       req.body;
@@ -49,7 +50,7 @@ const registerAdmin = asyncHandler(async (req, res) => {
   
       return res.status(201).json({
         status: "success",
-        message: "Admin registered successfully",
+        message: "User registered successfully",
         data: {
           _id: admin._id,
           name: admin.name,
