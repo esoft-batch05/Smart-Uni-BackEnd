@@ -77,6 +77,36 @@ const updateEvent = asyncHandler(async (req, res) => {
   });
 });
 
+const deAttendEvent = asyncHandler(async (req, res) => {
+  const { eventId } = req.params;  // Get event ID from URL
+  const { userId } = req.body;     // Get user ID from request body
+
+  // Find the event
+  const event = await Event.findById(eventId);
+  if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+  }
+
+  // Check if the user is actually attending
+  if (!event.attendees.includes(userId)) {
+      return res.status(400).json({ message: "User is not attending this event" });
+  }
+
+  // Remove the user from the attendees array
+  event.attendees = event.attendees.filter(id => id.toString() !== userId);
+
+  // Save the updated event
+  await event.save();
+
+  // Return the updated event details
+  return res.status(200).json({
+      status: "success",
+      message: "User removed from attendees list",
+      data: event
+  });
+});
+
+
 
 const getAllEvents = asyncHandler(async (req, res) => {
   const events = await Event.find().populate({
@@ -157,4 +187,5 @@ module.exports = {
   attendEvent,
   updateEvent,
   deleteEvent,
+  deAttendEvent,
 }

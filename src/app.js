@@ -7,6 +7,7 @@ const adminRoutes = require("./routes/adminRoutes");
 const userRoutes = require("./routes/userRoutes");
 const eventRoutes = require("./routes/eventRoutes");
 const fileUploadRoutes = require("./routes/fileUploadRoutes");
+const messageRoutes = require("./routes/messageRoutes");
 const errorHandler = require('./middlewares/errorHandler');
 const responseMiddleware = require("./middlewares/responseMiddleware");
 
@@ -44,5 +45,6 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/event", eventRoutes);
 app.use("/api/file",fileUploadRoutes);
+app.use("/api/message",messageRoutes);
 
 module.exports = app;
