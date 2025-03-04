@@ -17,16 +17,16 @@ const resourceSchema = new mongoose.Schema({
     },
     availability: {
         type: Boolean,
-        default: true // Indicates if the resource is available for booking
+        default: true 
     },
     bookedBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', // References the User who booked it
+        ref: 'User',
         default: null
     },
     event: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Event', // References the event for which the resource is booked
+        ref: 'event', 
         default: null
     },
     bookedAt: {
@@ -34,12 +34,12 @@ const resourceSchema = new mongoose.Schema({
         default: null
     },
     images: [{
-        type: String, // Stores the file path or URL of the image
+        type: String, 
         default: []
     }],
     handoverDate: {
         type: Date,
-        default: null // Date when the resource should be handed over
+        default: null 
     },
     createdAt: {
         type: Date,
