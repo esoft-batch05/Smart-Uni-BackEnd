@@ -6,6 +6,7 @@ const connectDB = require('./config/db');
 const adminRoutes = require("./routes/adminRoutes");
 const userRoutes = require("./routes/userRoutes");
 const eventRoutes = require("./routes/eventRoutes");
+const resourceRoutes = require("./routes/resourceRoutes");
 const fileUploadRoutes = require("./routes/fileUploadRoutes");
 const emailRoutes = require("./routes/emailRoutes");
 const messageRoutes = require("./routes/messageRoutes");
@@ -48,6 +49,7 @@ app.use("/api/event", eventRoutes);
 app.use("/api/file",fileUploadRoutes);
 app.use("/api/message",messageRoutes);
 app.use("/api/email", emailRoutes);
+app.use("/api/resource", resourceRoutes);
 
 
 module.exports = app;

@@ -11,6 +11,10 @@ const resourceSchema = new mongoose.Schema({
         required: true,
         enum: ["Technical", "Furniture", "Electronics", "Lighting", "Audio", "Visual", "Other"],
     },
+    status: {
+        type: String,
+        enum: ["Pending", "Approved", "Rejected"],
+    },
     description: {
         type: String,
         trim: true
@@ -26,7 +30,7 @@ const resourceSchema = new mongoose.Schema({
     },
     event: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'event', 
+        ref: 'Event', 
         default: null
     },
     bookedAt: {
