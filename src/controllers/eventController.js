@@ -3,7 +3,7 @@ const asyncHandler = require("../utils/asyncHandler");
 
 
 const createEvent = asyncHandler(async (req, res) => {
-  const { name, description, date, phoneNumber, location, organizer, attendees } =
+  const { name, description, date, phoneNumber, image, location, organizer, attendees,status, eventType } =
     req.body;
 
   const event = await Event.create({
@@ -12,6 +12,9 @@ const createEvent = asyncHandler(async (req, res) => {
     date,
     phoneNumber,
     location,
+    image,
+    eventType,
+    status,
     organizer,
     attendees,
   });
@@ -27,6 +30,9 @@ const createEvent = asyncHandler(async (req, res) => {
         date: event.date,
         phoneNumber: event.phoneNumber,
         location: event.location,
+        image: event.image,
+        status: event.status,
+        eventType: event.eventType,
         organizer: event.organizer,
         attendees: event.attendees,
       }

@@ -15,6 +15,18 @@ const eventSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
+    status: {
+        type: String,
+        enum: ["Pending", "Approved", "Rejected"],
+    },
+    eventType: {
+        type: String,
+        enum: ["free", "ticket"],
+    },
+    image: {
+        type: String, 
+
+    },
     location: {
         type: String,
         required: true,

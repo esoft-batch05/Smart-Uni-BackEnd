@@ -7,7 +7,7 @@ const { protect } = require("../middlewares/authMiddleware");
 
 const router = express.Router();
 
-router.post('/upload',protect, upload.single('file'), fileUploadController.uploadFile);
+router.post('/upload', upload.single('file'), fileUploadController.uploadFile);
 router.post('/upload-multiple',  upload.array('files', 5), fileUploadController.uploadMultipleFiles);
 
 // Public route to access uploaded files
