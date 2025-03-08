@@ -17,13 +17,17 @@ const eventSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ["Pending", "Approved", "Rejected"],
+        enum: ["pending", "approved", "rejected"],
     },
     eventType: {
         type: String,
         enum: ["free", "ticket"],
     },
     image: {
+        type: String, 
+
+    },
+    proposal: {
         type: String, 
 
     },

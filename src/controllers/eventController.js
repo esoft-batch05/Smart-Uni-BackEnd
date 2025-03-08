@@ -3,49 +3,66 @@ const asyncHandler = require("../utils/asyncHandler");
 
 
 const createEvent = asyncHandler(async (req, res) => {
-  const { name, description, date, phoneNumber, image, location, organizer, attendees,status, eventType } =
-    req.body;
+  try {
+    // Extract role from request body
+    const { name, description, date, phoneNumber, image, location, organizer, attendees, eventType, role, proposal } = req.body;
 
-  const event = await Event.create({
-    name,
-    description,
-    date,
-    phoneNumber,
-    location,
-    image,
-    eventType,
-    status,
-    organizer,
-    attendees,
-  });
+    // Validate role before proceeding
+    if (!role || !["admin", "lecturer", "student"].includes(role)) {
+      return res.status(400).json({ message: "Invalid role provided" });
+    }
 
-  if (event) {
-    return res.status(201).json({
-      status: "success",
-      message: "Event registerd successfully",
-      data: {
-        _id: event._id,
-        name: event.name,
-        description: event.description,
-        date: event.date,
-        phoneNumber: event.phoneNumber,
-        location: event.location,
-        image: event.image,
-        status: event.status,
-        eventType: event.eventType,
-        organizer: event.organizer,
-        attendees: event.attendees,
-      }
-    })
-  } else {
-    return res.status(400).json({ message: "Invalid Event data" });
+    // Set event status based on role
+    const status = role === "admin" ? "approved" : "pending";
+
+    // Create event
+    const event = await Event.create({
+      name,
+      description,
+      date,
+      phoneNumber,
+      location,
+      proposal,
+      image,
+      eventType,
+      status, // Dynamically set status
+      organizer,
+      attendees,
+    });
+
+    if (event) {
+      return res.status(201).json({
+        status: "success",
+        message: "Event registered successfully",
+        data: {
+          _id: event._id,
+          name: event.name,
+          description: event.description,
+          date: event.date,
+          phoneNumber: event.phoneNumber,
+          location: event.location,
+          image: event.image,
+          proposal : event.proposal,
+          status: event.status, 
+          eventType: event.eventType,
+          organizer: event.organizer,
+          attendees: event.attendees,
+        },
+      });
+    } else {
+      return res.status(400).json({ message: "Invalid event data" });
+    }
+  } catch (error) {
+    console.error("Error creating event:", error);
+    return res.status(500).json({ message: "Server error" });
   }
+});
 
-})
+
 
 const updateEvent = asyncHandler(async (req, res) => {
   const { eventId } = req.params; // Event ID to update
-  const { name, description, date, phoneNumber, location, organizer, attendees } = req.body; // New data to update
+  const { name, description, date, location, organizer, attendees, image } = req.body; // New data to update
 
   // Find the event by its ID
   const event = await Event.findById(eventId);
@@ -58,10 +75,10 @@ const updateEvent = asyncHandler(async (req, res) => {
   event.name = name || event.name;
   event.description = description || event.description;
   event.date = date || event.date;
-  event.phoneNumber = phoneNumber || event.phoneNumber;
   event.location = location || event.location;
   event.organizer = organizer || event.organizer;
   event.attendees = attendees || event.attendees;
+  event.image = image || event.image;
 
   // Save the updated event
   await event.save();
@@ -115,7 +132,7 @@ const deAttendEvent = asyncHandler(async (req, res) => {
 
 
 const getAllEvents = asyncHandler(async (req, res) => {
-  const events = await Event.find().populate({
+  const events = await Event.find({ status: "approved" }).populate({
     path: "attendees",
     select: "-password -__v -dateOfBirth -joinedDate -isActive"
   });
@@ -123,13 +140,55 @@ const getAllEvents = asyncHandler(async (req, res) => {
   if (events.length > 0) {
     return res.status(200).json({
       status: "success",
-      message: "Events retrieved successfully",
+      message: "Approved events retrieved successfully",
       data: events
     });
   } else {
-    return res.status(404).json({ message: "No events found" });
+    return res.status(404).json({ message: "No approved events found" });
   }
 });
+
+const getPendingEvents = asyncHandler(async (req, res) => {
+  const events = await Event.find({ status: "pending" }).populate({
+    path: "attendees",
+    select: "-password -__v -dateOfBirth -joinedDate -isActive"
+  });
+
+  if (events.length > 0) {
+    return res.status(200).json({
+      status: "success",
+      message: "Approved events retrieved successfully",
+      data: events
+    });
+  } else {
+    return res.status(404).json({ message: "No approved events found" });
+  }
+});
+
+const approveEvent = asyncHandler(async (req, res) => {
+  const { eventId } = req.params;
+
+  const event = await Event.findById(eventId);
+
+  if (!event) {
+    return res.status(404).json({ message: "Event not found" });
+  }
+
+  if (event.status === "approved") {
+    return res.status(400).json({ message: "Event is already approved" });
+  }
+
+  event.status = "approved";
+  await event.save();
+
+  return res.status(200).json({
+    status: "success",
+    message: "Event approved successfully",
+    data: event,
+  });
+});
+
+
 
 const deleteEvent = asyncHandler(async (req, res) => {
   const { eventId } = req.params; // Extract eventId from URL params
@@ -192,6 +251,8 @@ module.exports = {
   getAllEvents,
   attendEvent,
   updateEvent,
+  getPendingEvents,
+  approveEvent,
   deleteEvent,
   deAttendEvent,
 }

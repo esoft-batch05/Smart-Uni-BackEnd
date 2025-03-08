@@ -11,9 +11,9 @@ router.post('/upload', upload.single('file'), fileUploadController.uploadFile);
 router.post('/upload-multiple',  upload.array('files', 5), fileUploadController.uploadMultipleFiles);
 
 // Public route to access uploaded files
-router.get('/file/:filename',protect, fileUploadController.getFileByName);
+router.get('/:filename', fileUploadController.getFileByName);
 
 // Protected route to delete files
-router.delete('/file/:filename', fileUploadController.deleteFile);
+router.delete('/:filename', fileUploadController.deleteFile);
 
 module.exports = router;
