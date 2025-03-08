@@ -23,6 +23,9 @@ const resourceSchema = new mongoose.Schema({
         type: Boolean,
         default: true 
     },
+    inStock: {
+        type: String,
+    },
     bookedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -37,7 +40,7 @@ const resourceSchema = new mongoose.Schema({
         type: Date,
         default: null
     },
-    images: [{
+    image: [{
         type: String, 
         default: []
     }],

@@ -64,13 +64,14 @@ const getAllResources = asyncHandler(async (req, res) => {
 });
 
 const createResource = asyncHandler(async (req, res) => {
-    const { name, type, description, images } = req.body;
+    const { name, type, description, image, inStock } = req.body;
 
     const resource = await Resource.create({
         name,
         type,
         description,
-        images
+        image,
+        inStock
     });
 
     return res.status(201).json({
