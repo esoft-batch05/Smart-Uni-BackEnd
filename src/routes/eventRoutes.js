@@ -7,6 +7,7 @@ const {
     getPendingEvents,
     approveEvent,
     updateEvent,
+    getAprovedEvents,
     deAttendEvent,
 } = require("../controllers/eventController")
 const { protect } = require("../middlewares/authMiddleware");
@@ -18,6 +19,7 @@ router.get("/getAllEvents",protect, getAllEvents);
 router.post("/attendEvent", attendEvent);
 router.get("/pendingEvents", getPendingEvents);
 router.get("/approveEvents/:eventId", approveEvent);
+router.get("/getAprovedEvents", getAprovedEvents);
 router.post("/deAttendEvent/:eventId", deAttendEvent);
 router.post("/updateEvent/:eventId", updateEvent);
 router.delete("/deleteEvent/:eventId", deleteEvent);

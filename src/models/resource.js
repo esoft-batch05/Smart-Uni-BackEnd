@@ -40,6 +40,10 @@ const resourceSchema = new mongoose.Schema({
         type: Date,
         default: null
     },
+    status: {
+        type: String,
+        enum: ["pending", "approved", "rejected"],
+    },
     image: [{
         type: String, 
         default: []

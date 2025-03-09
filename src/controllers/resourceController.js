@@ -1,3 +1,4 @@
+const Event = require("../models/event");
 const Resource = require("../models/resource");
 const User = require("../models/user");
 const asyncHandler = require("../utils/asyncHandler");
@@ -97,6 +98,15 @@ const getAllResources = asyncHandler(async (req, res) => {
     });
 });
 
+const getAllPendingResources = asyncHandler(async (req, res) => {
+    const pendingResources = await Resource.find({ status: "pending" }).populate("bookedBy event");
+    return res.status(200).json({
+        status: "success",
+        message: "Pending resources retrieved successfully",
+        data: pendingResources
+    });
+});
+
 const createResource = asyncHandler(async (req, res) => {
     const { name, type, description, image, inStock } = req.body;
 
@@ -131,5 +141,67 @@ const deleteResource = asyncHandler(async (req, res) => {
     });
 });
 
-module.exports = { bookResource, getAllResources, createResource, deleteResource, updateResource };
+const bookaResource = asyncHandler(async (req, res) => {
+    const { resourceId } = req.params;
+    const { userId, eventId, handoverDate } = req.body;
+
+  
+
+    const resource = await Resource.findById(resourceId);
+    if (!resource) {
+        return res.status(500).json({ message: "Resource not found" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+        return res.status(500).json({ message:user });
+    }
+
+    const event = await Event.findById(eventId);
+    if (!event) {
+        return res.status(500).json({ message: "Event not found" });
+    }
+
+    if (!resource.availability || parseInt(resource.inStock) === 0) {
+        return res.status(400).json({ message: "Resource is not available for booking" });
+    }
+
+    let status = "pending";
+    if (user.role === "admin") {
+        status = "approved";
+    }
+
+
+    // Update resource details
+    resource.bookedBy = userId;
+    resource.event = eventId;
+    resource.status = status;
+    resource.handoverDate = handoverDate;
+    resource.bookedAt = new Date();
+    resource.inStock = (parseInt(resource.inStock) - 1).toString();
+    resource.availability = parseInt(resource.inStock) > 0;
+
+    await resource.save();
+
+    return res.status(200).json({
+        status: "success",
+        message: "Resource booked successfully",
+        data: {
+            _id: resource._id,
+            name: resource.name,
+            type: resource.type,
+            description: resource.description,
+            image: resource.image,
+            status : resource.status,
+            inStock: resource.inStock,
+            availability: resource.availability,
+            bookedBy: user,
+            event: event,
+            handoverDate: resource.handoverDate,
+            bookedAt: resource.bookedAt
+        }
+    });
+});
+
+module.exports = { bookResource, getAllResources, getAllPendingResources, createResource, deleteResource, updateResource, bookaResource };
 

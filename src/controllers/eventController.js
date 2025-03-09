@@ -157,6 +157,23 @@ const getPendingEvents = asyncHandler(async (req, res) => {
   if (events.length > 0) {
     return res.status(200).json({
       status: "success",
+      message: "pending events retrieved successfully",
+      data: events
+    });
+  } else {
+    return res.status(404).json({ message: "No approved events found" });
+  }
+});
+
+const getAprovedEvents = asyncHandler(async (req, res) => {
+  const events = await Event.find({ status: "approved" }).populate({
+    path: "attendees",
+    select: "-password -__v -dateOfBirth -joinedDate -isActive"
+  });
+
+  if (events.length > 0) {
+    return res.status(200).json({
+      status: "success",
       message: "Approved events retrieved successfully",
       data: events
     });
@@ -252,6 +269,7 @@ module.exports = {
   attendEvent,
   updateEvent,
   getPendingEvents,
+  getAprovedEvents,
   approveEvent,
   deleteEvent,
   deAttendEvent,
