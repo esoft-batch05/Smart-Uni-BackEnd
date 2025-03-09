@@ -53,6 +53,40 @@ const bookResource = asyncHandler(async (req, res) => {
     });
 });
 
+const updateResource = asyncHandler(async (req, res) => {
+  const { resourceId } = req.params; // Event ID to update
+  const { name, type, description, image, inStock } = req.body; // New data to update
+
+  const resource = await Resource.findById(resourceId);
+
+  if (!resource) {
+      return res.status(404).json({ message: "Resource not found" });
+  }
+
+  resource.name = name || resource.name;
+  resource.type = type || resource.type;
+  resource.description = description || resource.description;
+  resource.image = image || resource.image;
+  resource.inStock = inStock || resource.inStock;
+
+
+  await resource.save();
+
+  return res.status(200).json({
+      status: "success",
+      message: "Resource updated successfully",
+      data: {
+          _id: resource._id,
+          name: resource.name,
+          type: resource.type,
+          description: resource.description,
+          image: resource.image,
+          inStock: resource.inStock,
+         
+      }
+  });
+});
+
 // Controller to get all resources
 const getAllResources = asyncHandler(async (req, res) => {
     const resources = await Resource.find().populate("bookedBy event");
@@ -81,4 +115,21 @@ const createResource = asyncHandler(async (req, res) => {
     });
 });
 
-module.exports = { bookResource, getAllResources, createResource };
+const deleteResource = asyncHandler(async (req, res) => {
+    const { resourceId } = req.params;
+
+    // Find and delete the resource
+    const resource = await Resource.findByIdAndDelete(resourceId);
+    if (!resource) {
+        return res.status(404).json({ status: "error", message: "Resource not found" });
+    }
+
+    return res.status(200).json({
+        status: "success",
+        message: "Resource deleted successfully",
+        data: resource
+    });
+});
+
+module.exports = { bookResource, getAllResources, createResource, deleteResource, updateResource };
+
