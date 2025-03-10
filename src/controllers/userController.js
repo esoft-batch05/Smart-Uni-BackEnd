@@ -18,7 +18,7 @@ const generateRefreshToken = (id) => {
 
 
 const registerAdmin = asyncHandler(async (req, res) => {
-    const { name, email, password, phoneNumber, dateOfBirth, address, role } =
+    const { firstName, email, password, phoneNumber, dateOfBirth, address, role } =
       req.body;
   
     const adminExists = await Admin.findOne({ email });
@@ -27,7 +27,7 @@ const registerAdmin = asyncHandler(async (req, res) => {
     }
   
     const admin = await Admin.create({
-      name,
+      firstName,
       email,
       password,
       phoneNumber,
@@ -53,11 +53,11 @@ const registerAdmin = asyncHandler(async (req, res) => {
         message: "User registered successfully",
         data: {
           _id: admin._id,
-          name: admin.name,
+          firstName: admin.firstName,
           email: admin.email,
           phone: admin.phoneNumber,
           dateOfBirth: admin.dateOfBirth,
-          address: admin.address,
+          address: admin.address.street,
           role: admin.role,
           token: accessToken,
           refreshToken: refreshToken,
@@ -67,6 +67,34 @@ const registerAdmin = asyncHandler(async (req, res) => {
       return res.status(400).json({ message: "Invalid admin data" });
     }
   });
+
+  const getUserDetails = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        const user = await Admin.findById(userId).select("-password"); // Exclude password
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        return res.status(200).json({
+            status: "success",
+            message: "User details fetched successfully",
+            data: {
+                _id: user._id,
+                firstName: user.firstName,
+                email: user.email,
+                phone: user.phoneNumber,
+                dateOfBirth: user.dateOfBirth,
+                address: user.address,
+                role: user.role,
+            },
+        });
+    } catch (error) {
+        return res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
 
   
 // Login Admin
@@ -91,7 +119,7 @@ const loginAdmin = asyncHandler(async (req, res) => {
       message: "Admin logged in successfully",
       data: {
         _id: admin._id,
-        name: admin.name,
+        firstName: admin.firstName,
         email: admin.email,
         role: admin.role,
         address: admin.address,
@@ -163,4 +191,5 @@ const getAdminProfile = asyncHandler(async (req, res) => {
     registerAdmin,
     loginAdmin,
     refreshTokens,
+    getUserDetails,
   };

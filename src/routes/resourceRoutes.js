@@ -5,6 +5,7 @@ const {
    createResource,
    deleteResource,
    updateResource,
+   approveResource,
    bookaResource,
    getAllPendingResources,
 } = require("../controllers/resourceController")
@@ -19,6 +20,7 @@ router.post("/createResource",protect, createResource);
 router.delete("/deleteResource/:resourceId",protect, deleteResource);
 router.post("/updateResource/:resourceId",protect, updateResource);
 router.post("/bookaResource/:resourceId",protect, bookaResource);
+router.get("/approveResource/:resourceId",protect, approveResource);
 
 
 module.exports = router;

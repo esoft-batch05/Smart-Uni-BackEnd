@@ -203,5 +203,28 @@ const bookaResource = asyncHandler(async (req, res) => {
     });
 });
 
-module.exports = { bookResource, getAllResources, getAllPendingResources, createResource, deleteResource, updateResource, bookaResource };
+const approveResource = asyncHandler(async (req, res) => {
+  const { resourceId } = req.params;
+
+  const resource = await Resource.findById(resourceId);
+
+  if (!resource) {
+    return res.status(404).json({ message: "Resource not found" });
+  }
+
+  if (resource.status === "approved") {
+    return res.status(400).json({ message: "Resource is already approved" });
+  }
+
+  resource.status = "approved";
+  await resource.save();
+
+  return res.status(200).json({
+    status: "success",
+    message: "Resource approved successfully",
+    data: resource,
+  });
+});
+
+module.exports = { bookResource, approveResource, getAllResources, getAllPendingResources, createResource, deleteResource, updateResource, bookaResource };
 
