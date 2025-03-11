@@ -2,70 +2,115 @@ const jwt = require("jsonwebtoken");
 const Admin = require("../models/admin");
 const asyncHandler = require("../utils/asyncHandler");
 
-// Generate JWT
+// Generate access token (expires in 15 minutes)
 const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET || "default_secret_key", { expiresIn: "30d" });
+  return jwt.sign({ id }, process.env.JWT_SECRET || "default_secret_key", {
+    expiresIn: "1h",
+  });
 };
 
-// Register Admin
-const registerAdmin = asyncHandler(async (req, res) => {
-    const { name, email, password } = req.body;
+// Generate refresh token (expires in 7 days)
+const generateRefreshToken = (id) => {
+  return jwt.sign(
+    { id },
+    process.env.REFRESH_TOKEN_SECRET || "default_refresh_key",
+    { expiresIn: "7d" }
+  );
+};
 
-    const adminExists = await Admin.findOne({ email });
-    if (adminExists) {
-        res.status(400).json({ message: "Admin already exists" });
-        return;
-    }
-
-    const admin = await Admin.create({ name, email, password });
-    if (admin) {
-        res.status(201).json({
-            id: admin.id,
-            name: admin.name,
-            email: admin.email,
-            token: generateToken(admin.id),
-        });
-    } else {
-        res.status(400).json({ message: "Invalid admin data" });
-    }
-});
 
 // Login Admin
 const loginAdmin = asyncHandler(async (req, res) => {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
 
-    const admin = await Admin.findOne({ email });
-    if (admin && (await admin.matchPassword(password))) {
-        // Generate access token
-        const accessToken = generateToken(admin.id);
+  const admin = await Admin.findOne({ email });
+  if (admin && (await admin.matchPassword(password))) {
+    const accessToken = generateToken(admin._id);
+    const refreshToken = generateRefreshToken(admin._id);
 
-        // Generate refresh token
-        const refreshToken = jwt.sign(
-            { id: admin.id },
-            process.env.REFRESH_TOKEN_SECRET || "default_refresh_key",
-            { expiresIn: "7d" } // Set longer expiry for refresh token
-        );
+    // Set refresh token in cookie
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
 
-        // Send both tokens in the response
-        res.status(200).json({
-            id: admin.id,
-            name: admin.name,
-            email: admin.email,
-            token: accessToken, // Access token
-            refreshToken: refreshToken, // Refresh token
-        });
-    } else {
-        res.status(401).json({ message: "Invalid email or password" });
-    }
+    return res.status(200).json({
+      status: "success",
+      message: "Admin logged in successfully",
+      data: {
+        _id: admin._id,
+        name: admin.name,
+        email: admin.email,
+        role: admin.role,
+        address: admin.address,
+        phone: admin.phoneNumber,
+        dob: admin.dateOfBirth,
+        token: accessToken,
+        refreshToken: refreshToken,
+      },
+    });
+  } else {
+    return res.status(401).json({ message: "Invalid email or password" });
+  }
 });
+
+// Refresh Tokens
+const refreshTokens = asyncHandler(async (req, res) => {
+  try {
+    // Extract refresh token from the request body
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(400).json({ message: "Refresh token is required" });
+    }
+
+    // Verify refresh token
+    jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRET || "default_refresh_key",
+      async (err, decoded) => {
+        if (err) {
+          return res.status(401).json({ message: "Invalid or expired refresh token" });
+        }
+
+        // Find the admin user
+        const admin = await Admin.findById(decoded.id);
+        if (!admin) {
+          return res.status(404).json({ message: "Admin not found" });
+        }
+
+        // Generate new tokens
+        const newAccessToken = generateToken(admin._id);
+        const newRefreshToken = generateRefreshToken(admin._id);
+
+        // Send response with new tokens
+        return res.status(200).json({
+          status: "success",
+          message: "Tokens refreshed successfully",
+          data: {
+            accessToken: newAccessToken,
+            newRefreshToken: newRefreshToken,
+          },
+        });
+      }
+    );
+  } catch (error) {
+    console.error("Error refreshing token:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
 
 // Get Admin Profile
 const getAdminProfile = asyncHandler(async (req, res) => {
-    res.json(req.admin);
+  res.json(req.admin);
 });
 
 module.exports = {
-    registerAdmin,
-    loginAdmin,
-    getAdminProfile,
+  loginAdmin,
+  refreshTokens,
+  getAdminProfile,
 };
