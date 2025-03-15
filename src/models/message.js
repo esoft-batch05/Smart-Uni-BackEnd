@@ -21,19 +21,7 @@ const messageSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  read: {
-    type: Boolean,
-    default: false
-  },
-  // Optional: for message attachments
-  attachments: [{
-    type: String,
-    url: String
-  }]
 });
 
-// Index for faster queries
-messageSchema.index({ sender: 1, recipient: 1 });
-messageSchema.index({ recipient: 1, read: 1 });
 
 module.exports = mongoose.model('Message', messageSchema);

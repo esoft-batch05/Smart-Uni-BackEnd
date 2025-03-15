@@ -11,7 +11,8 @@ const resourceRoutes = require("./routes/resourceRoutes");
 const fileUploadRoutes = require("./routes/fileUploadRoutes");
 const emailRoutes = require("./routes/emailRoutes");
 const messageRoutes = require("./routes/messageRoutes");
-const classRoutes = require("./routes/venueRoutes");
+const venueRoutes = require("./routes/venueRoutes");
+const classRoutes = require("./routes/classRoutes");
 const errorHandler = require('./middlewares/errorHandler');
 const responseMiddleware = require("./middlewares/responseMiddleware");
 
@@ -55,7 +56,8 @@ app.use("/api/message", messageRoutes);
 app.use("/api/email", emailRoutes);
 app.use("/api/resource", resourceRoutes);
 app.use('/api/messages', messageRoutes);
-app.use('/api/venue', classRoutes);
+app.use('/api/venue', venueRoutes);
+app.use('/api/class', classRoutes);
 
 require('../src/Services/socketService')(io);
 

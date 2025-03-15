@@ -3,24 +3,24 @@
 const Message = require('../models/message');
 const User = require('../models/user');
 
+// Get messages between two users
 exports.getMessages = async (req, res) => {
   try {
-    const userId  = req.params.userId;
-    const currentUserId = req.params._id;
+    const { userId, otherUserId } = req.params;
     
     // Verify the other user exists
-    const otherUser = await User.findById(userId);
+    const otherUser = await User.findById(otherUserId);
     if (!otherUser) {
       return res.status(404).json({ message: 'User not found' });
     }
     
-    // Get messages between current user and the other user
+    // Fetch messages between the two users
     const messages = await Message.find({
       $or: [
-        { sender: currentUserId, recipient: userId },
-        { sender: userId, recipient: currentUserId }
+        { sender: userId, recipient: otherUserId },
+        { sender: otherUserId, recipient: userId }
       ]
-    }).sort({ timestamp: 1 });
+    }).sort({ createdAt: 1 });
     
     return res.status(200).json(messages);
   } catch (error) {
@@ -28,42 +28,29 @@ exports.getMessages = async (req, res) => {
   }
 };
 
+// Get all conversations of a user
 exports.getConversations = async (req, res) => {
   try {
-    const currentUserId = req.params.userId;
+    const { userId } = req.params;
     
-    // Get all unique conversations the user has
-    const sentMessages = await Message.find({ sender: currentUserId })
-      .distinct('recipient');
+    // Get unique conversation users
+    const sentMessages = await Message.find({ sender: userId }).distinct('recipient');
+    const receivedMessages = await Message.find({ recipient: userId }).distinct('sender');
     
-    const receivedMessages = await Message.find({ recipient: currentUserId })
-      .distinct('sender');
-    
-    // Combine and remove duplicates
     const conversationUserIds = [...new Set([...sentMessages, ...receivedMessages])];
     
-    // Get last message and user info for each conversation
-    const conversations = await Promise.all(conversationUserIds.map(async (userId) => {
-      const otherUser = await User.findById(userId, 'username email avatar');
-      
+    const conversations = await Promise.all(conversationUserIds.map(async (otherUserId) => {
+      const otherUser = await User.findById(otherUserId, 'username email avatar');
       const lastMessage = await Message.findOne({
         $or: [
-          { sender: currentUserId, recipient: userId },
-          { sender: userId, recipient: currentUserId }
+          { sender: userId, recipient: otherUserId },
+          { sender: otherUserId, recipient: userId }
         ]
-      }).sort({ timestamp: -1 });
-      
-      // Count unread messages
-      const unreadCount = await Message.countDocuments({
-        sender: userId,
-        recipient: currentUserId,
-        read: false
-      });
+      }).sort({ createdAt: -1 });
       
       return {
         user: otherUser,
-        lastMessage,
-        unreadCount
+        lastMessage
       };
     }));
     
@@ -73,12 +60,10 @@ exports.getConversations = async (req, res) => {
   }
 };
 
+// Send a message
 exports.sendMessage = async (req, res) => {
   try {
-    const { recipientId, content } = req.body;
-    const senderId = req.params.senderId;
-
-    
+    const { senderId, recipientId, content } = req.body;
     
     // Verify recipient exists
     const recipient = await User.findById(recipientId);
@@ -86,12 +71,11 @@ exports.sendMessage = async (req, res) => {
       return res.status(404).json({ message: 'Recipient not found' });
     }
     
-    // Create new message
+    // Create and save the message
     const newMessage = new Message({
       sender: senderId,
       recipient: recipientId,
-      content,
-      timestamp: new Date()
+      content
     });
     
     await newMessage.save();
@@ -102,18 +86,17 @@ exports.sendMessage = async (req, res) => {
   }
 };
 
+// Delete a message
 exports.deleteMessage = async (req, res) => {
   try {
     const { messageId } = req.params;
-    const userId = req.user._id;
+    const { userId } = req.body;
     
     const message = await Message.findById(messageId);
-    
     if (!message) {
       return res.status(404).json({ message: 'Message not found' });
     }
     
-    // Check if user is the sender
     if (message.sender.toString() !== userId.toString()) {
       return res.status(403).json({ message: 'Not authorized to delete this message' });
     }

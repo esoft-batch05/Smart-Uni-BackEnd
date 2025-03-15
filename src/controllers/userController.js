@@ -158,6 +158,38 @@ const getUserDetails = async (req, res) => {
   }
 };
 
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await Admin.find().select("-password"); // Exclude passwords
+
+    if (!users || users.length === 0) {
+      return res.status(404).json({ message: "No users found" });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      message: "Users fetched successfully",
+      data: users.map(user => ({
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        bio: user?.bio,
+        profileImage: user?.profileImage,
+        address: user?.address,
+        alternatePhone: user?.alternatePhone,
+        phone: user.phoneNumber,
+        dateOfBirth: user.dateOfBirth,
+        role: user.role,
+      })),
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+module.exports = { getAllUsers };
+
 
 // Login Admin
 const loginAdmin = asyncHandler(async (req, res) => {
@@ -255,5 +287,6 @@ module.exports = {
   loginAdmin,
   refreshTokens,
   getUserDetails,
+  getAllUsers,
   updateUser,
 };
