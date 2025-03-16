@@ -158,6 +158,39 @@ const getUserDetails = async (req, res) => {
   }
 };
 
+const getAllLecturers = async (req, res) => {
+  try {
+    // Find all users with role "lecturer", excluding passwords
+    const lecturers = await Admin.find({ role: "lecturer" }).select("-password");
+
+    if (!lecturers.length) {
+      return res.status(404).json({ message: "No lecturers found" });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      message: "Lecturers fetched successfully",
+      data: lecturers.map((lecturer) => ({
+        _id: lecturer._id,
+        firstName: lecturer.firstName,
+        lastName: lecturer.lastName,
+        email: lecturer.email,
+        role: lecturer.role,
+        address: lecturer.address || {},
+        phone: lecturer.phoneNumber,
+        profileImage: lecturer.profileImage || "",
+        token: lecturer.token || "",
+        refreshToken: lecturer.refreshToken || "",
+      })),
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+module.exports = { getAllLecturers };
+
+
 const getAllUsers = async (req, res) => {
   try {
     const users = await Admin.find().select("-password"); // Exclude passwords
@@ -289,4 +322,5 @@ module.exports = {
   getUserDetails,
   getAllUsers,
   updateUser,
+  getAllLecturers,
 };
