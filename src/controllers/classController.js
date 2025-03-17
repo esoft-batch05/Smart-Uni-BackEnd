@@ -5,7 +5,7 @@ const asyncHandler = require("../utils/asyncHandler");
 // Get all classes
 exports.getClasses = asyncHandler(async (req, res) => {
     try {
-        const classes = await Class.find().populate("instructor students").lean();
+        const classes = await Class.find().populate("instructor students venue").lean();
         return res.status(200).json({
             status: "success",
             message: "Classes retrieved successfully",
@@ -46,7 +46,7 @@ exports.getClassById = asyncHandler(async (req, res) => {
 // Create a new class
 exports.createClass = asyncHandler(async (req, res) => {
     try {
-        const { name, instructor, schedule, students, status } = req.body;
+        const { name, instructor, schedule, students, status, venue } = req.body;
 
         
 
@@ -56,6 +56,7 @@ exports.createClass = asyncHandler(async (req, res) => {
             schedule,
             students,
             status,
+            venue,
         });
 
         await newClass.save();

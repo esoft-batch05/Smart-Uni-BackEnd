@@ -27,6 +27,11 @@ const classSchema = new mongoose.Schema({
       ref: "User", // Assuming students are stored in the 'User' collection
     },
   ],
+  venue: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Venue',
+        
+      },
   status: {
     type: String,
     enum: ["Active", "Completed", "Cancelled"],
