@@ -1,5 +1,7 @@
 const Event = require("../models/event");
 const asyncHandler = require("../utils/asyncHandler");
+const Class = require("../models/class");
+
 
 
 const createEvent = asyncHandler(async (req, res) => {
@@ -270,6 +272,44 @@ const attendEvent = asyncHandler(async (req, res) => {
   });
 });
 
+const getApprovedClassesAndEvents = asyncHandler(async (req, res) => {
+  try {
+    // Get all approved events
+    const events = await Event.find({ status: "approved" })
+      .populate({
+        path: "attendees",
+        select: "-password -__v -dateOfBirth -joinedDate -isActive"
+      })
+      .populate("venue");
+
+    // Get all approved classes
+    const classes = await Class.find()
+      .populate("instructor", "-password")
+      .populate("students")
+      .populate("venue")
+      .lean();
+
+    // Combine the results
+    const result = {
+      events: events || [],
+      classes: classes || []
+    };
+
+    if (events.length > 0 || classes.length > 0) {
+      return res.status(200).json({
+        status: "success",
+        message: "Approved classes and events retrieved successfully",
+        data: result
+      });
+    } else {
+      return res.status(404).json({ message: "No approved classes or events found" });
+    }
+  } catch (error) {
+    console.error("Error retrieving approved classes and events:", error);
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
 module.exports = {
   createEvent,
   getAllEvents,
@@ -280,4 +320,5 @@ module.exports = {
   approveEvent,
   deleteEvent,
   deAttendEvent,
+  getApprovedClassesAndEvents,
 }

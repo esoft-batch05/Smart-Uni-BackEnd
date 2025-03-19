@@ -6,15 +6,11 @@ const Class = require('../models/class');
 
 exports.getClasses = async (req, res) => {
     try {
-        // Fetch venues
         const venues = await Venue.find().lean();
 
-        // Fetch classes and events for each venue
         const venuesWithDetails = await Promise.all(venues.map(async (venue) => {
-            // Get classes for each venue
             const classes = await Class.find({ venue: venue._id }).lean();
             
-            // Get events for each venue
             const events = await Event.find({ venue: venue._id }).lean();
 
             return { 
