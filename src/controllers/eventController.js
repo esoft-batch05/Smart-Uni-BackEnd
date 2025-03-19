@@ -5,7 +5,7 @@ const asyncHandler = require("../utils/asyncHandler");
 const createEvent = asyncHandler(async (req, res) => {
   try {
     // Extract role from request body
-    const { name, description, date, phoneNumber, image, location, organizer, attendees, eventType, role, proposal } = req.body;
+    const { name, description, date, phoneNumber, image, location, organizer, attendees, eventType, role, proposal, venue } = req.body;
 
     // Validate role before proceeding
     if (!role || !["admin", "lecturer", "student"].includes(role)) {
@@ -25,9 +25,10 @@ const createEvent = asyncHandler(async (req, res) => {
       proposal,
       image,
       eventType,
-      status, // Dynamically set status
+      status, 
       organizer,
       attendees,
+      venue,
     });
 
     if (event) {
@@ -47,6 +48,7 @@ const createEvent = asyncHandler(async (req, res) => {
           eventType: event.eventType,
           organizer: event.organizer,
           attendees: event.attendees,
+          venue: event.venue,
         },
       });
     } else {
@@ -62,7 +64,7 @@ const createEvent = asyncHandler(async (req, res) => {
 
 const updateEvent = asyncHandler(async (req, res) => {
   const { eventId } = req.params; // Event ID to update
-  const { name, description, date, location, organizer, attendees, image } = req.body; // New data to update
+  const { name, description, date, location, organizer, attendees, image, venue } = req.body; // New data to update
 
   // Find the event by its ID
   const event = await Event.findById(eventId);
@@ -79,6 +81,7 @@ const updateEvent = asyncHandler(async (req, res) => {
   event.organizer = organizer || event.organizer;
   event.attendees = attendees || event.attendees;
   event.image = image || event.image;
+  event.venue = venue || event.venue;
 
   // Save the updated event
   await event.save();
@@ -96,6 +99,7 @@ const updateEvent = asyncHandler(async (req, res) => {
           location: event.location,
           organizer: event.organizer,
           attendees: event.attendees,
+          venue: event.venue,
       }
   });
 });
@@ -132,10 +136,12 @@ const deAttendEvent = asyncHandler(async (req, res) => {
 
 
 const getAllEvents = asyncHandler(async (req, res) => {
-  const events = await Event.find({ status: "approved" }).populate({
-    path: "attendees",
-    select: "-password -__v -dateOfBirth -joinedDate -isActive"
-  });
+  const events = await Event.find({ status: "approved" })
+    .populate({
+      path: "attendees",
+      select: "-password -__v -dateOfBirth -joinedDate -isActive"
+    })
+    .populate("venue"); // Populating venue details
 
   if (events.length > 0) {
     return res.status(200).json({
@@ -147,6 +153,7 @@ const getAllEvents = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: "No approved events found" });
   }
 });
+
 
 const getPendingEvents = asyncHandler(async (req, res) => {
   const events = await Event.find({ status: "pending" }).populate({

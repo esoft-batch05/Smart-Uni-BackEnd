@@ -25,21 +25,19 @@ const eventSchema = new mongoose.Schema({
     },
     image: {
         type: String, 
-
     },
     proposal: {
         type: String, 
-
-    },
-    location: {
-        type: String,
-        required: true,
-        trim: true
     },
     organizer: {
         type: String,
         required: true,
         trim: true
+    },
+    venue: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Venue',
+      
     },
     attendees: [{
         type: mongoose.Schema.Types.ObjectId,
