@@ -19,6 +19,8 @@ const responseMiddleware = require("./middlewares/responseMiddleware");
 dotenv.config();
 connectDB();
 
+
+
 const app = express();
 const server = http.createServer(app);
 const socketIO = require('socket.io');
@@ -29,6 +31,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(responseMiddleware);
 app.use(errorHandler);
+app.get("/", (req, res) => res.send("Express on Vercel"));
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
