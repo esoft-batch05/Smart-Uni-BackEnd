@@ -14,6 +14,8 @@ const messageRoutes = require("./routes/messageRoutes");
 const venueRoutes = require("./routes/venueRoutes");
 const classRoutes = require("./routes/classRoutes");
 const libraryRoutes = require("./routes/libraryRoutes");
+const shopRoutes = require("./routes/shopRoutes");
+
 const errorHandler = require('./middlewares/errorHandler');
 const responseMiddleware = require("./middlewares/responseMiddleware");
 
@@ -63,6 +65,7 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/venue', venueRoutes);
 app.use('/api/class', classRoutes);
 app.use('/api/library', libraryRoutes);
+app.use('/api/shop', shopRoutes);
 
 
 require('../src/Services/socketService')(io);
