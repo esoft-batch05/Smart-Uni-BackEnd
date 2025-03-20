@@ -109,6 +109,7 @@ const getAllPendingResources = asyncHandler(async (req, res) => {
 
 const createResource = asyncHandler(async (req, res) => {
     const { name, type, description, image, inStock } = req.body;
+console.log(image);
 
     const resource = await Resource.create({
         name,
