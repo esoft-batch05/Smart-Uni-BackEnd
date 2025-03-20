@@ -13,6 +13,7 @@ const emailRoutes = require("./routes/emailRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const venueRoutes = require("./routes/venueRoutes");
 const classRoutes = require("./routes/classRoutes");
+const libraryRoutes = require("./routes/libraryRoutes");
 const errorHandler = require('./middlewares/errorHandler');
 const responseMiddleware = require("./middlewares/responseMiddleware");
 
@@ -61,6 +62,8 @@ app.use("/api/resource", resourceRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/venue', venueRoutes);
 app.use('/api/class', classRoutes);
+app.use('/api/library', libraryRoutes);
+
 
 require('../src/Services/socketService')(io);
 
