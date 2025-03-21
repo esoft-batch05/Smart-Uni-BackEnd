@@ -4,6 +4,8 @@ const path = require('path');
 
 
 exports.uploadFile = (req, res) => {
+  console.log("hiiiiiiiiii");
+  
     try {
       if (!req.file) {
         return res.status(400).json({ 
