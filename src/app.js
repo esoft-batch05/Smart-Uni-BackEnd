@@ -15,6 +15,7 @@ const venueRoutes = require("./routes/venueRoutes");
 const classRoutes = require("./routes/classRoutes");
 const libraryRoutes = require("./routes/libraryRoutes");
 const shopRoutes = require("./routes/shopRoutes");
+const orderRoutes = require("./routes/orderRoutes")
 
 const errorHandler = require('./middlewares/errorHandler');
 const responseMiddleware = require("./middlewares/responseMiddleware");
@@ -66,6 +67,8 @@ app.use('/api/venue', venueRoutes);
 app.use('/api/class', classRoutes);
 app.use('/api/library', libraryRoutes);
 app.use('/api/shop', shopRoutes);
+app.use('/api/order', orderRoutes);
+
 
 
 require('../src/Services/socketService')(io);
