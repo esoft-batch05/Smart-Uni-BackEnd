@@ -13,11 +13,14 @@ const emailRoutes = require("./routes/emailRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const venueRoutes = require("./routes/venueRoutes");
 const classRoutes = require("./routes/classRoutes");
+const libraryRoutes = require("./routes/libraryRoutes");
 const errorHandler = require('./middlewares/errorHandler');
 const responseMiddleware = require("./middlewares/responseMiddleware");
 
 dotenv.config();
 connectDB();
+
+
 
 const app = express();
 const server = http.createServer(app);
@@ -29,6 +32,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(responseMiddleware);
 app.use(errorHandler);
+app.get("/", (req, res) => res.send("Express on Vercel"));
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -58,6 +62,8 @@ app.use("/api/resource", resourceRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/venue', venueRoutes);
 app.use('/api/class', classRoutes);
+app.use('/api/library', libraryRoutes);
+
 
 require('../src/Services/socketService')(io);
 
