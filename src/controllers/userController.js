@@ -18,7 +18,7 @@ const generateRefreshToken = (id) => {
 
 
 const registerAdmin = asyncHandler(async (req, res) => {
-  const { firstName, email, password, phoneNumber, dateOfBirth, address, role } =
+  const { firstName,lastName, email, password, phoneNumber, dateOfBirth, address, role } =
     req.body;
 
   const adminExists = await Admin.findOne({ email });
@@ -28,6 +28,7 @@ const registerAdmin = asyncHandler(async (req, res) => {
 
   const admin = await Admin.create({
     firstName,
+    lastName,
     email,
     password,
     phoneNumber,
